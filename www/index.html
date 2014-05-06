@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+	
+
+	<link rel="stylesheet" type="text/css" href="css/jqm132.css" />
+	<style>
+	  bodyx {
+	    display: none;
+	  }
+	</style>
+	<script type="text/javascript" src="js/jq191.js"></script>
+	<script type="text/javascript" src="js/jqm132.js"></script>
+	<!--  
+	<script src="http://jsconsole.com/remote.js?046E6E62-F7CF-44D6-8416-C0A7FF0E504A"></script>
+	<link rel="stylesheet" type="text/css" href="css/jqm121.css" />
+	<script type="text/javascript" src="js/jq183.js"></script>
+	<script type="text/javascript" src="js/jqm121.js"></script>
+	-->
+
+	<script type="text/javascript" src="phonegap.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script type="text/javascript">
+	    app.initialize();
+	</script>
+	<style type="text/css">
+	</style>
+        <title>Mutti-Distro</title>
+    </head>
+    <body>
+        <div class="app">
+      <!-- menu -->
+      <div data-role="page" id="menu" data-position="fixed">
+	<div data-role="header">
+	  <h1>Mutti - Distribución</h1>
+	</div>
+	<div data-role="content">
+	  <ul data-role="listview" class="mainmenu">
+	    <li><a id="btCli" href="#" class="ui-disabled" onClick="app.openCli()"><h3>Clientes</h3><p>Registro de clientes</p></a></li>
+	    <li><a id="btSync" href="#" class="ui-disabled" onClick="app.Sync()"><h3>Actualizar</h3><p>Actualizar Clientes y Productos</p></a></li>
+	    <li><a id="btRem" href="#" class="ui-disabled" onClick="app.openRem()"><h3>Productos disponibles</h3><p>Carga de mercaderia</p></a></li>
+	    <li><a id="btCierre" href="#" class="ui-disabled" onClick="app.closeRem()"><h3>Ventas</h3><p>Ventas y Cierre</p></a></li>
+	    <li><a id="btDevId" href="#" onClick="app.onDeviceId()"><h3>Dispositivo</h3><p>Información del dispositivo</p></a></li>
+	    <li><a id="btGeo" href="#" onClick="app.onGeo()"><h3>Posición</h3><p>Datos de ubicación</p></a></li>
+	  </ul>
+	</div>
+	<div data-role="footer" data-position="fixed">	  
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#" data-role="button" onclick="app.onExit()">Salir</a></li>
+			</ul>
+		</div>
+	</div>
+      </div><!-- /page -->
+
+      <!-- Cliente -->
+      <div data-role="page" id="pCli" data-dom-cache="true">
+	<div data-role="header" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" data-role="button" onClick="app.filter('VISITADOS')">Visitados</a></li>
+				<li><a href="#" data-role="button" onClick="app.filter('MODIFICADOS')">Modificados</a>	</li>
+				<li><a href="#" data-role="button" onClick="app.filter('CERCANOS')">Cercanos</a></li>
+			</ul>
+		</div>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" data-role="button" onClick="app.filter('TODOS')">Todos</a></li>
+				<li><a href="#" data-role="button" onClick="app.refreshCliList()">Actualizar</a></li>
+				<li><a href="#" data-role="button" onClick="app.newCli()">Nuevo</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="content">
+	    <ul data-role="listview" data-filter="true"  data-filter-placeholder="Buscar..." id="lstCli">  </ul>
+	</div>
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	  </div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Remision -->
+      <div data-role="page" id="pRem" data-dom-cache="true">
+	<div data-role="header" data-position="fixed">
+	  <h3 id="pRemTitle">Remision</h3>
+	</div>
+	<div data-role="content">
+	    <ul data-role="listview"  id="lstRem">  </ul>
+	</div>
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Remision -->
+      <div data-role="page" id="pCierre" data-dom-cache="true">
+	<div data-role="header" data-position="fixed">
+	  <h3 id="pCieTitle">Cierre</h3>
+	</div>
+	<h3 id="tProd">Mercaderias</h3>
+	<div data-role="content">
+	    <ul data-role="listview"  id="lstCie">  </ul>
+	</div>
+	<h3 id="tVent">Ventas</h3>
+	<div data-role="content">
+	    <ul data-role="listview"  id="lstVent">  </ul>
+	    <p id="msg">-</p>
+	</div>
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" id="btCierre" data-role="button" onclick="app.cierre()">Cierre</a></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Cliente -->
+      <div data-role="page" id="pCliEdit" >
+	<div data-role="header" data-position="fixed">
+	    <h1>Cliente</h1>
+	</div>
+	<div data-role="content">
+	  <form id="fNewCli">
+	  <div data-role="fieldcontain">
+	    <label for="tnID_CLIENTE">Código:</label>
+	    <input id="tnID_CLIENTE" name="ID_CLIENTE" type="text" disabled />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnID_ZONA" class="select">Zona</label>
+	    <select id="tnID_ZONA" name="ID_ZONA" >
+		  <option value="1">The 1st Option</option>
+	    </select>
+	  </div>
+
+	  <div data-role="fieldcontain">
+	    <label for="tnID_TIPO_CLIENTE" class="select">Tipo</label>
+	    <select id="tnID_TIPO_CLIENTE" name="ID_TIPO_CLIENTE" >
+		  <option value="1">The 1st Option</option>
+	    </select>
+	  </div>
+
+	  <div data-role="fieldcontain">
+	    <label for="tnID_GRUPO_CLIENTE" class="select">Grupo</label>
+	    <select id="tnID_GRUPO_CLIENTE" name="ID_GRUPO_CLIENTE" >
+		  <option value="1">The 1st Option</option>
+	    </select>
+	  </div>
+
+	  <div data-role="fieldcontain">
+	    <label for="tnID_PROMOTOR" class="select">Promotor</label>
+	    <select id="tnID_PROMOTOR" name="ID_PROMOTOR" ><option value="1">The 1st Option</option></select>
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnID_CIUDAD" class="select">Ciudad</label>
+	    <select id="tnID_CIUDAD" name="ID_CIUDAD" ><option value="1">The 1st Option</option></select>
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnID_BARRIO" class="select">Barrio</label>
+	    <select id="tnID_BARRIO" name="ID_BARRIO" ><option value="1">The 1st Option</option></select>
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnID_DISTRITO" class="select">Distrito</label>
+	    <select id="tnID_DISTRITO" name="ID_DISTRITO" ><option value="1">The 1st Option</option></select>
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnID_SUPERVISOR" class="select">Supervisor</label>
+	    <select id="tnID_SUPERVISOR" name="ID_SUPERVISOR" ><option value="1">The 1st Option</option></select>
+	  </div>
+
+	  <div data-role="fieldcontain">
+	    <label for="tnNOMBRE">Nombre:</label>
+	    <input id="tnNOMBRE" name="NOMBRE" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnDIRECCION">Dirección:</label>
+	    <input id="tnDIRECCION" name="DIRECCION" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnTELEFONO">Teléf.</label>
+	    <input id="tnTELEFONO" name="TELEFONO" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnRUC">RUC</label>
+	    <input id="tnRUC" name="RUC" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnMAIL">Mail</label>
+	    <input id="tnMAIL" name="MAIL" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnTIPO_VENTA" class="select">Tipo Venta</label>
+	    <select id="tnTIPO_VENTA" name="TIPO_VENTA" ><option value="1">The 1st Option</option></select>
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnGENERA_IVA" class="select">Genera IVA</label>
+	    <select id="tnGENERA_IVA" name="GENERA_IVA" ><option value="NO">NO</option></select>
+	  </div>
+
+
+	  <div data-role="fieldcontain">
+	    <label for="tnPERSONAL">Personal</label>
+	    <input id="tnPERSONAL" name="PERSONAL" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnPROPIETARIO">Propietario</label>
+	    <input id="tnPROPIETARIO" name="PROPIETARIO" type="text" />
+	  </div>
+	  <div data-role="fieldcontain">
+	    <label for="tnENCARGADO">Encargado</label>
+	    <input id="tnENCARGADO" name="ENCARGADO" type="text" />
+	  </div>
+	  </form>
+	</div><!-- /content -->
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" data-role="button" onclick="app.saveCli()" >Guardar</a></li>
+				<li><a href="#" data-role="button" onclick="app.visitado()" >Visitado</a></li>
+				<li><a href="#" data-role="button" onclick="app.takePicture()" >Foto</a></li>
+				<li><a href="#pCli" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <div data-role="page" id="pVenta" data-dom-cache="true">
+	<div data-role="header" data-position="fixed">
+	  <h3 id="pVentaTitle">Venta</h3>
+	</div>
+	<div data-role="content">
+	  <form id="fVta" data-enhance="true">
+          </form>
+	</div>
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#" data-role="button" onclick="app.vtaGuardar()">Guardar</a></li>
+				<li></li>
+				<li><a href="#" onclick="app.ventaBack()" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Sync -->
+      <div data-role="page" id="pSync">
+	<div data-role="header" data-position="fixed">
+	  <h1>Actualizar</h1>
+	</div><!-- /header -->
+	<div data-role="content">
+	  <p id="synCli">Trasferir datos...</p>
+	  <p id="synEv">Trasferir Eventos...</p>
+	</div><!-- /content -->
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Dispositivo -->
+      <div data-role="page" id="pDevId">
+	<div data-role="header" data-position="fixed">
+	  <h1>Dispositivo</h1>
+	</div><!-- /header -->
+	<div data-role="content">
+	  <p id="deviceProperties">Dispositivo...</p>
+	  <p id="cfg.id">Registro...</p>
+	  <p id="cfg">...</p>
+	  <p id="msg"></p>
+	</div><!-- /content -->
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+
+      <!-- Posicion -->
+      <div data-role="page" id="pGeo">
+	<div data-role="header" data-position="fixed">
+	<h1>Posición</h1>
+	</div><!-- /header -->
+	<div data-role="content">
+	  <p id="geolocation">Hallando ubicacion...</p>
+	  <p id="geolocationErr"></p>
+	</div><!-- /content -->
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li></li>
+				<li></li>
+				<li><a href="#menu" data-role="button">Volver</a></li>
+			</ul>
+		</div>
+	</div><!-- /footer -->
+      </div><!-- /page -->
+     </div>
+     <!--	  
+        <div class="app">
+            <h1>PhoneGap 1</h1>
+            <div id="deviceready" class="blink">
+                <p class="event listening">Connecting to Device</p>
+                <p class="event received">Device is Ready</p>
+            </div>
+	    <p id="geolocation">Finding geolocation...</p>
+	    <p id="geolocation2">geopos...</p>
+        </div>
+
+      <a href="#popupLogin" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-icon="check" data-theme="a" data-transition="pop">Sign in</a>
+      <div data-role="popup" id="popupMenu" data-theme="a">
+	  <div data-role="popup" id="popupLogin" data-theme="a" class="ui-corner-all">
+	      <form>
+		  <div style="padding:10px 20px;">
+		    <h3>Please sign in</h3>
+		    <label for="un" class="ui-hidden-accessible">Username:</label>
+		    <input type="text" name="user" id="un" value="" placeholder="username" data-theme="a">
+		    <label for="pw" class="ui-hidden-accessible">Password:</label>
+		    <input type="password" name="pass" id="pw" value="" placeholder="password" data-theme="a">
+		    <button type="submit" data-theme="b" data-icon="check">Sign in</button>
+		  </div>
+	      </form>
+	  </div>
+      </div>
+
+      -->
+    </body>
+</html>
