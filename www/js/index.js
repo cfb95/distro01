@@ -307,7 +307,7 @@ var app = {
         $.mobile.changePage($("#pDevId"), {});     
 	app.getSrvUrl(function(srvUrl){
 	    var element = document.getElementById('deviceProperties');
-	    element.innerHTML = 'SISTEMA: DISTRO V1.0 <br>' +
+	    element.innerHTML = 'SISTEMA: DISTRO v1.0.3 <br>' +
 				'TmrStep: '     + app.tmrStep  + '<br>' +
 				'UUID: '     + device.uuid     + '<br>' +
 				'Model: '    + device.model    + '<br>' +
