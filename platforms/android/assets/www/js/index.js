@@ -63,7 +63,7 @@ var app = {
 	this.srvURL = '';
 	$.support.cors = true;
 	$.mobile.allowCrossDomainPages = true;	
-	$.mobile.selectmenu.prototype.options.nativeMenu = false;
+	$.mobile.selectmenu.prototype.options.nativeMenu = true;
 	//navigator.splashscreen.show();
 	
 	var $this = $( this ),
@@ -307,8 +307,8 @@ var app = {
         $.mobile.changePage($("#pDevId"), {});     
 	app.getSrvUrl(function(srvUrl){
 	    var element = document.getElementById('deviceProperties');
-	    element.innerHTML = 'SISTEMA: DISTRO v1.0.3 <br>' +
-				'TmrStep: '     + app.tmrStep  + '<br>' +
+	    element.innerHTML = 'SISTEMA: DISTRO v1.0.4 <br>' +
+				'TmrStep: '  + app.tmrStep  + '<br>' +
 				'UUID: '     + device.uuid     + '<br>' +
 				'Model: '    + device.model    + '<br>' +
 				'Platform: ' + device.platform + '<br>' +
@@ -702,10 +702,8 @@ var app = {
 	if(data.success){
 	  console.log('---------CIERRE VACIO');
 	  app.borrarEntr();
-	}
-	
+	}	
       }
-
     },
     onSrvFail: function(jqxhr, textStatus, error ) {
       console.log('onSrvFail ');
@@ -1205,7 +1203,7 @@ var app = {
     },    
     dbNewCli: function(tx){
       console.log('dbNewCli '+app.cfg["LID"] );      
-      tx.executeSql("INSERT INTO cliente (ID_CLIENTE,NOMBRE,DIRECCION, ZZ_ID_CLI_DEVICE, ZZ_MODIFIED,ID_REPARTIDOR, ID_ZONA,ID_TIPO_CLIENTE,ID_GRUPO_CLIENTE,ID_PROMOTOR,ID_CIUDAD,ID_BARRIO,ID_DISTRITO,ID_SUPERVISOR,TIPO_VENTA,GENERA_IVA,ZZ_DEVICE,ZZ_LAT,ZZ_LON,ZZ_PREC,ZZ_SPEED,ZZ_FECHA) values (?,?,?,?,'NUEVO',?,1,1,1,1,1,1,1,1,'CONTADO','NO',?,?,?,?,?,?)"
+      tx.executeSql("INSERT INTO cliente (ID_CLIENTE,NOMBRE,DIRECCION, ZZ_ID_CLI_DEVICE, ZZ_MODIFIED,ID_REPARTIDOR, ID_ZONA,ID_TIPO_CLIENTE,ID_GRUPO_CLIENTE,ID_PROMOTOR,ID_CIUDAD,ID_BARRIO,ID_DISTRITO,ID_SUPERVISOR,TIPO_VENTA,GENERA_IVA,ZZ_DEVICE,ZZ_LAT,ZZ_LON,ZZ_PREC,ZZ_SPEED,ZZ_FECHA) values (?,?,?,?,'NUEVO',?,1,2,1,1,1,1,1,1,'CONTADO','NO',?,?,?,?,?,?)"
 	,[app.cfg["LID"]+'',app.cfg["LID"]+' Nuevo','---',app.cfg["LID"],app.cfg["ID_REPARTIDOR"]
 	,app.cfg['ID']
 	,app.geoPos.coords.latitude
@@ -1888,8 +1886,6 @@ var app = {
 	     app.closeRem();
 	   }
       });
-	
-	
 	//$("#tnSUBTOTAL"+inum,"#fVta").val(cant*precio);
         //$("#tnTOTAL"+app.nrem,"#fVta").val(acum)
     },
@@ -1899,7 +1895,6 @@ var app = {
     },
     OnCloseRem: function() {
       console.log('OnCloseRem');
-      
 	  app.cieOk=0;
 	  app.cieCnt=0;
 	  app.db.transaction(
@@ -1909,7 +1904,6 @@ var app = {
 		var params=[];
 		var sql;
 		var acum=0;
-		
 		sql="SELECT count(*) as climod from cliente where ZZ_MODIFIED >''";
 		console.log('  SQL '+sql);
 		tx.executeSql(sql,params,
@@ -1926,13 +1920,10 @@ var app = {
 			    }else{
 			      $("#btCierre","#pCierre").show();
 			    }
-			    
 			}
 		    }
 		    ,app.onError
 		);   
-		
-		
 		sql='SELECT r.REMISION_NRO,d.ID_REMITO_DETALLE,d.ID_REMITO,d.PDESCR,d.CANTIDAD_NETA,d.PRECIO,d.TOTAL,(select coalesce(sum(CANTIDAD_NETA),0) from entrdet WHERE ITEM=ID_REMITO_DETALLE) as VENDIDO,(select coalesce(sum(TOTAL),0) from entrdet WHERE ITEM=ID_REMITO_DETALLE) as VENTA from rem r,remdet d where r.ID_REMITO=d.ID_REMITO order by d.ID_REMITO_DETALLE ';
 		console.log('  SQL '+sql);
 		tx.executeSql(sql,params,
@@ -1964,14 +1955,12 @@ var app = {
 		var acum=0;
 		sql='SELECT r.ID_REMITO,r.TICKET,r.FACTURA,r.ID_CLIENTE,r.TOTAL, c.RUC,c.NOMBRE, coalesce((select count(*) from entrdet),0) as ICANT from entr r,cliente c where c.ID_CLIENTE = r.ID_CLIENTE  order by r.TICKET ';
 		console.log('  SQL '+sql);
-		
 		tx.executeSql(sql,params,
 		  function(tx, results){
 		      //$.mobile.showPageLoadingMsg(true);
 		      var len = results.rows.length;
 		      var htmlData;
 		      var acum=0;
-		      
 		      //console.log('dbOnOpenRem '+len);
 		      $("#lstVent","#pCierre").empty();
 		      for (var i=0; i<len; i++){
@@ -1992,7 +1981,6 @@ var app = {
 		  }
 		  ,app.onError
 	      );	
-      
       }
       , app.onError
       , function(){ 
@@ -2022,9 +2010,7 @@ var app = {
 		    console.log('.listview(refresh) '+err.message)	  
 		  }
 		  //console.log('refreshed!');
-	
       });
-	    
     },
     cierre: function(){
       var r=confirm('Esta seguro que desea CERRAR VENTAS?');
@@ -2043,7 +2029,6 @@ var app = {
 	      var params=[];
 	      var sql;
 	      var acum=0;
-	      
 	      sql="SELECT ID_REMITO,TICKET,coalesce(FACTURA,'') as FACTURA,ID_DEVICE,ID_CLIENTE,TOTAL,  LAT,LON,PREC,COALESCE(SPEED,0) as SPEED,FECHA from entr order by ID_REMITO,TICKET";
 	      console.log('  SQL '+sql);
 	      tx.executeSql(sql,params,
@@ -2058,7 +2043,6 @@ var app = {
 			  rows.push(results.rows.item(i));
 			  //console.log("Row = " + i + " ID = " + results.rows.item(i).ID_CLIENTE + " cliente =  " + results.rows.item(i).NOMBRE);
 			  //$.post(app.getSrvUrl()+'&e=cierrecab',{rows: rows}, app.onSrvData, 'json')
-			  
 			  $.getJSON(app.srvURL+'&e=cierrecab',{rows: rows},app.onSrvData)
 			    .fail(app.onSrvFail)
 			    .always(app.onSrvAlways);
@@ -2075,7 +2059,6 @@ var app = {
 	  }    
 	  ,app.onError
 	  ,function(){ console.log('cierre cab enviado')}
-	  
 	);
       });	
     },
@@ -2103,15 +2086,11 @@ var app = {
 		    var rows=[];
 		    rows.push(results.rows.item(i));
 		      //console.log("Row = " + i + " ID = " + results.rows.item(i).ID_CLIENTE + " cliente =  " + results.rows.item(i).NOMBRE);
-		    
 		    $.getJSON(app.srvURL+'&e=cierredet',{rows: rows},app.onSrvData)
 			.fail(app.onSrvFail)
-			.always(app.onSrvAlways);
-	             
+			.always(app.onSrvAlways);  
 		  }
-		    
 		  $.ajaxSetup({async: true});
-		  
 		  if(len==0){
 		    app.onSrvData({e:'cierredet', success: true, msg:'Sin Ventas det'});
 		    /*
@@ -2120,19 +2099,14 @@ var app = {
 			.always(app.onSrvAlways);
 	            */
 		  }
-		  
 	      }
 	      ,app.onError
 	  );	    
 	}    
 	,app.onError
 	,function(){ console.log('cierredet fin')}
-	
       );
-
     },
-
-    
     borrarEntr: function(){
  	  app.db.transaction(
 	    function(tx){
@@ -2149,6 +2123,5 @@ var app = {
 		$.mobile.changePage($("#menu"), { });
 	    }  
 	  );      
-    }
-    
+    }  
 };

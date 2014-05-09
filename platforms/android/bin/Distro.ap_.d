@@ -17,7 +17,6 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/img \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins \
-/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/phonegap.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/cordova.js \
@@ -27,7 +26,7 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/cordova_plugins.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/config.xml \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/spec.html \
-/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jqm132.js \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jqm142.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jq191.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/index.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/img/logo.png \
@@ -80,8 +79,8 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/CameraPopoverHandle.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/CameraConstants.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/CameraPopoverOptions.js \
-/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css/jqm132.css \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css/index.css \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css/jqm142.css \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res/screen \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res/icon \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res/screen/bada \
