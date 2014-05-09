@@ -17,6 +17,7 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/img \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/phonegap.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/cordova.js \
