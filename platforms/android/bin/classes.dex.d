@@ -7,6 +7,9 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/net/homelinux/cfaure/distro/R$string.class \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/net/homelinux/cfaure/distro/R$attr.class \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/com/phonegap/helloworld/HelloWorld.class \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/globalization/GlobalizationError.class \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/globalization/Globalization$1.class \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/globalization/Globalization.class \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/dialogs/Notification$2$3.class \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/dialogs/Notification$4$1.class \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/bin/classes/org/apache/cordova/dialogs/Notification$1$2.class \

@@ -17,7 +17,6 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/img \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins \
-/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/phonegap.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/css \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/res \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/cordova.js \
@@ -28,11 +27,12 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/config.xml \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/spec.html \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jqm142.js \
-/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jq191.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/index.js \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/js/jq1111.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/img/logo.png \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.splashscreen \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.device \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.globalization \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.vibration \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.file-transfer \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.dialogs \
@@ -43,6 +43,9 @@
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.splashscreen/www/splashscreen.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.device/www \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.device/www/device.js \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.globalization/www \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.globalization/www/globalization.js \
+/home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.globalization/www/GlobalizationError.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.vibration/www \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.vibration/www/vibration.js \
 /home/cfb/src_local/mutti/distro/distro01/platforms/android/assets/www/plugins/org.apache.cordova.file-transfer/www \

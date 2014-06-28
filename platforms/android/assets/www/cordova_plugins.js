@@ -220,6 +220,20 @@ module.exports = [
         "merges": [
             "navigator.notification"
         ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.globalization/www/GlobalizationError.js",
+        "id": "org.apache.cordova.globalization.GlobalizationError",
+        "clobbers": [
+            "window.GlobalizationError"
+        ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.globalization/www/globalization.js",
+        "id": "org.apache.cordova.globalization.globalization",
+        "clobbers": [
+            "navigator.globalization"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -232,7 +246,8 @@ module.exports.metadata =
     "org.apache.cordova.file-transfer": "0.4.2",
     "org.apache.cordova.splashscreen": "0.3.0",
     "org.apache.cordova.dialogs": "0.2.7",
-    "org.apache.cordova.vibration": "0.3.8"
+    "org.apache.cordova.vibration": "0.3.8",
+    "org.apache.cordova.globalization": "0.2.8"
 }
 // BOTTOM OF METADATA
 });

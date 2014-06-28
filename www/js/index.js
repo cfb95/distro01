@@ -44,12 +44,55 @@ var app = {
     viva: Object,
     vdescuento: Object,
     vdescr: Object,
+    vdisponible: Object,
+    vactual: Object,
     cieOk: 0,
     cieCnt: 0,
     ticket: 0,
     factura: String,
     confirmBtn: 0,
     srvURL: String,
+    cxTipo: '---',
+    //formatea el input #ctl
+    fmtNum: function (v){
+      var ret='';
+      var sv=''+v;
+      console.log('rx '+ v);
+      navigator.globalization.stringToNumber(sv,
+	  function (num) {
+	    //console.log('num: ' + num.value + '\n');
+	    navigator.globalization.numberToString(num.value,function (str){ret=str.value; },function () {console.log('Error getting number\n');},{type:'decimal'}); 
+	  },
+	  function () {console.log('Error getting string\n');},
+	  {type:'decimal'}
+      );
+      return ret;
+    },
+    unFmtNum: function(n){
+	var ret;
+	navigator.globalization.stringToNumber(n,
+	    function (num) {
+	      ret=num.value;
+	    },
+	    function () {console.log('Error getting string\n');},
+	    {type:'decimal'}
+	);
+	return ret;
+    },
+    fmtNumCtl: function (ctl){
+	var v=($('#'+ctl).val());
+	$('#'+ctl).val(app.fmtNum(v));
+    },
+    getNValue: function(ctl){
+      //alert($('#'+ctl).val());
+      //alert(app.unFmt($('#'+ctl).val()));
+      return app.unFmtNum($('#'+ctl).val())
+    },
+    setNValue: function(ctl,v){
+      $('#'+ctl).val(v);
+      app.fmtNumCtl(ctl)
+    },
+
     // Application Constructor
     initialize: function() {
         console.log('app.initialize');
@@ -130,7 +173,8 @@ var app = {
 	}else if($.mobile.activePage.is('#pSync')){
 	    $.mobile.changePage($("#menu"), { });
 	}else if($.mobile.activePage.is('#pVenta')){
-	    $.mobile.changePage($("#pCli"), { });
+	    app.ventaBack(); 
+	    //$.mobile.changePage($("#pCli"), { });
 	}else if($.mobile.activePage.is('#pGeo')){
 	    $.mobile.changePage($("#menu"), { });
 	}else if($.mobile.activePage.is('#pDevId')){
@@ -266,7 +310,7 @@ var app = {
       $('#geolocationErr').html('Status: ' + error.code+' '+error.message+' '+app.tick );
     },
     onGeoLocation: function(position) {
-	console.log('onGeoLocation');
+	//console.log('onGeoLocation');
 
 	
         var element = document.getElementById('geolocation');
@@ -278,7 +322,7 @@ var app = {
 	//if(String(position.timestamp).search(" ")<0){
 	  
           ts=(new Date(position.timestamp)).toISOString();
-	  console.log(' convert timestamp '+ position.timestamp+' to '+ts );
+	  //console.log(' convert timestamp '+ position.timestamp+' to '+ts );
 	//}
 	  
         element.innerHTML = 'Latitud: '           + position.coords.latitude              + '<br />' +
@@ -300,20 +344,20 @@ var app = {
 	app.geoPos=JSON.parse(JSON.stringify(position));
         app.geoPos.timestamp=ts;
 	if((app.tick%30) == 0 && app.tmrStep>='4'){
-	   app.regEv('TRK');
+	   //app.regEv('TRK');
 	}
     },
     onDeviceId: function(){
         $.mobile.changePage($("#pDevId"), {});     
 	app.getSrvUrl(function(srvUrl){
 	    var element = document.getElementById('deviceProperties');
-	    element.innerHTML = 'SISTEMA: DISTRO v1.0.4 <br>' +
+	    element.innerHTML = 'SISTEMA: DISTRO v1.0.6 <br>' +
 				'TmrStep: '  + app.tmrStep  + '<br>' +
 				'UUID: '     + device.uuid     + '<br>' +
 				'Model: '    + device.model    + '<br>' +
 				'Platform: ' + device.platform + '<br>' +
 				'Version: '  + device.version  + '<br>' +
-				'Network: '  + navigator.connection.type+'<br>'+
+				'Network: '  + app.cxTipo+'<br>'+
 				'SERVER: '  + srvUrl+'<br>';
 	    //$('#cfg.id').append('...');
 	    document.getElementById('cfg.id').innerHTML +='...';
@@ -357,9 +401,18 @@ var app = {
     getSrvUrl: function(execAfter){
       //app.host='SERVER_PROD_WAN';
       var ok=false;
+      if(typeof(navigator.connection) == 'undefined'){
+	//console.log(navigator.network.connection.type);
+	app.cxTipo=navigator.network.connection.type;
+      }else{
+	//console.log(navigator.network.connection.type);
+	app.cxTipo=navigator.connection.type;
+      }	  
+      console.log('connection type '+app.cxTipo);
+      
       if(typeof execAfter === "undefined")
 	execAfter=function(srvUrl){ };      
-      if(navigator.connection.type=='wifi'){
+      if(app.cxTipo=='wifi'){
 	if(app.srvURL === '' ){ 
 	  var url='http://'+app.cfg['SERVER_PROD_LAN']+'/distro.php?uuid='+device.uuid;
 	  $.ajaxSetup({async: true, timeout: 5000});
@@ -534,7 +587,7 @@ var app = {
 	  if(data.new_id_cliente){
 	    app.db.transaction(function(tx){ 
 		tx.executeSql('update cliente set id_cliente=?, ZZ_MODIFIED=? where ID_CLIENTE=?',[data.new_id_cliente,'',data.id_cliente]
-		  ,function(e){console.log('  update evento set id_cliente='+data.new_id_cliente+' where ID_CLIENTE='+data.id_cliente);}
+		  ,function(e){console.log('  update cliente set id_cliente='+data.new_id_cliente+' where ID_CLIENTE='+data.id_cliente);}
 		  ,app.onError);
 	        tx.executeSql('update entr set id_cliente=? where ID_CLIENTE=?',[data.new_id_cliente,data.id_cliente]
 		  ,function(e){console.log('  update entr set id_cliente='+data.new_id_cliente+' where ID_CLIENTE='+data.id_cliente);}
@@ -1083,14 +1136,15 @@ var app = {
       tx.executeSql("select rowid,* FROM evento ORDER BY fecha",[],app.onSyncEv);
     },
     onSyncEv: function(tx, results) {
-        var len = results.rows.length;
+        var len = results.rows.length
+        $.ajaxSetup({async: false, timeout: 15000});;
         console.log("Eventos -> host: " + len + ' ' + app.srvURL );
 	
 	app.devEvCnt=len;
 	app.devEvOk=0;
-	for(j=0;j<len;j+=100){
+	for(j=0;j<len;j+=10){
 	  var rows=[];
-	  for (var i=0; i<Math.min(100,len - j) ; i++){
+	  for (var i=0; i<Math.min(10,len - j) ; i++){
 	      //console.log("Row = " + i + " ROWID = " + results.rows.item(i).rowid + " ev =  " + results.rows.item(i).EVENTO);
 	      rows.push(results.rows.item(j+i));
 	  } 
@@ -1369,12 +1423,12 @@ var app = {
 			if(i==0){
 			  $("#pRemTitle","#pRem").empty().html('Remisión Nº '+row.REMISION_NRO+' ('+row.ID_REMITO+')');
 			}
-			htmlData = '<li ><a href="#"><h2>'+row.PDESCR+'</h2><p  class="ui-li-aside">'+row.CANTIDAD_NETA+' <br> Gs '+row.PRECIO+' * '+row.CANTIDAD_NETA+' = '+row.TOTAL+'</p></a></li>';
+			htmlData = '<li ><a href="#"><h2>'+row.PDESCR+'</h2><p  class="ui-li-aside"><br>'+row.CANTIDAD_NETA+' <br> Gs '+row.PRECIO+' * '+row.CANTIDAD_NETA+' = '+row.TOTAL+'</p></a></li>';
 			//console.log(htmlData);
 			acum=acum+parseInt(row.TOTAL);
 			$("#lstRem","#pRem").append(htmlData);
 		    }
-		    htmlData = '<li ><a href="#"><h2>TOTAL</h2><p  class="ui-li-aside"> Gs '+acum.toLocaleString()+'</p></a></li>';
+		    htmlData = '<li ><a href="#"><h2>TOTAL</h2><br><p  class="ui-li-aside"> Gs '+acum.toLocaleString()+'</p></a></li>';
 		    $("#lstRem","#pRem").append(htmlData);
 		    //
 		}
@@ -1438,6 +1492,8 @@ var app = {
 		    app.vdescr={};
 		    app.vdescuento={};
 		    app.viva={};
+		    app.vactual={};
+		    app.vdisponible={};
 		    for (var i=0; i<len; i++){
 		        //var descuento=0.0;
 			var row= results.rows.item(i);
@@ -1449,8 +1505,8 @@ var app = {
 			  $("#pVentaTitle",'#pVenta').empty().html('Venta '+app.cliData.NOMBRE);
 			  app.nrem=row.ID_REMITO;
 			  htmlData = '<div data-role="fieldcontain">';
-			  htmlData = htmlData +'<label for="tnFACT">FACTURA Nº</label>';
-			  htmlData = htmlData +'<input id="tnFACT"   name="FACTURA" type="number" value="'+app.factura+'"  />';
+			  htmlData = htmlData +'<label for="tsFACT">FACTURA Nº</label>';
+			  htmlData = htmlData +'<input id="tsFACT"   name="FACTURA" type="number" value="'+app.factura+'"  />';
 			  htmlData = htmlData +'</div>';	
 			  $("#fVta",'#pVenta').append(htmlData);
 			  
@@ -1464,6 +1520,8 @@ var app = {
 			app.viva[row.ID_REMITO_DETALLE]=0;
 			app.vdescr[row.ID_REMITO_DETALLE]=row.PDESCR;
 			app.vdescuento[row.ID_REMITO_DETALLE]=0;
+			app.vdisponible[row.ID_REMITO_DETALLE]=0;
+			app.vactual[row.ID_REMITO_DETALLE]=0;
 			if(row.ID_FAMILIA=='1' && parseFloat(app.cliData.DESCUENTO_EMBUTIDOS)>0.0){
 			  descu=app.cliData.DESCUENTO_EMBUTIDOS;
 			  app.vdescuento[row.ID_REMITO_DETALLE]=parseFloat(app.cliData.DESCUENTO_EMBUTIDOS);
@@ -1490,25 +1548,27 @@ var app = {
 			  iva_descr='GRAV. '+row.IVA+'%';
 			}
 			app.viva[row.ID_REMITO_DETALLE]=String(iva+'').trim();
+			app.vdisponible[row.ID_REMITO_DETALLE]=(parseFloat(row.CANTIDAD_NETA)*1.05 - parseFloat(row.VENDIDO));
+			app.vactual[row.ID_REMITO_DETALLE]=parseFloat(row.CN);
 			//console.log('app.vitems '+JSON.stringify(app.vitems));
 			//console.log('app.vdescr '+JSON.stringify(app.vdescr));
 			htmlData ='<div data-role="fieldcontain">';
-			htmlData = htmlData +'<label for="tnITEM">'+row.PDESCR+' Gs.'+row.PRECIOVENTA+' ('+(row.CANTIDAD_NETA - row.VENDIDO)+' )</label>';
+			htmlData = htmlData +'<label for="tnITEM">'+row.PDESCR+' Gs.'+app.fmtNum(row.PRECIOVENTA)+' ('+app.fmtNum((row.CANTIDAD_NETA - row.VENDIDO))+' )</label>';
 			//htmlData = htmlData +'<input id="tnPRODUCTO'+row.ID_REMITO_DETALLE+'" name="ID_PRODUCTO" type="text" value="'+row.ID_PRODUCTO+'" />';
-			htmlData = htmlData +'<input id="tnCANT'+row.ID_REMITO_DETALLE+'"  data-inline="true"   name="CANTIDAD_NETA" type="number" value="'+row.CN+'" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')"/>';
-			htmlData = htmlData +'<input id="tnSUBTOTAL'+row.ID_REMITO_DETALLE+'"  data-inline="true" name="SUBTOTAL" type="number" value="0" disabled />';
+			htmlData = htmlData +'<input id="tnCANT'+row.ID_REMITO_DETALLE+'"  data-inline="true"   name="CANTIDAD_NETA" type="number" max="'+ (row.CANTIDAD_NETA - row.VENDIDO) +'" value="'+row.CN+'" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')"/>';
+			htmlData = htmlData +'<input id="tnSUBTOTAL'+row.ID_REMITO_DETALLE+'"  data-inline="true" name="SUBTOTAL" type="text" value="0" disabled />';
 			htmlData = htmlData +'</div>';
 			//htmlData = htmlData +'</div>';
 			
 			htmlData = htmlData +'<div id="diviva'+row.ID_REMITO_DETALLE+'" data-role="fieldcontain"  >';
 			htmlData = htmlData +'<label for="tnIVA'+row.ID_REMITO_DETALLE+'">I.V.A.</label>';
-			htmlData = htmlData +'<input id="tnIVA'+row.ID_REMITO_DETALLE+'"   name="IVA" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')"  value="'+ app.viva[row.ID_REMITO_DETALLE] +'" disabled />';
+			htmlData = htmlData +'<input id="tnIVA'+row.ID_REMITO_DETALLE+'"   name="IVA" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')"  value="'+ app.fmtNum(app.viva[row.ID_REMITO_DETALLE]) +'" disabled />';
 			htmlData = htmlData +'</div>';
 			
 			//htmlData = htmlData +'<input id="tnCANTNET'+row.ID_REMITO_DETALLE+'"  name="CANTIDAD_NETA" type="text" value="0" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')"/>';
 			htmlData = htmlData +'<div id="divprecio'+row.ID_REMITO_DETALLE+'" data-role="fieldcontain">';
 			htmlData = htmlData +'<label for="tnPRECIO">Precio Gs.</label>';
-			htmlData = htmlData +'<input id="tnPRECIO'+row.ID_REMITO_DETALLE+'"   name="PRECIO" type="number" value="'+row.PRECIOVENTA+'" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')" disabled />';
+			htmlData = htmlData +'<input id="tnPRECIO'+row.ID_REMITO_DETALLE+'"   name="PRECIO" type="text" value="'+app.fmtNum(row.PRECIOVENTA)+'" onChange="app.vtaChange('+row.ID_REMITO_DETALLE+')" disabled />';
 			htmlData = htmlData +'</div>';
 			/*
 			htmlData = htmlData +'<div data-role="fieldcontain">';
@@ -1519,7 +1579,7 @@ var app = {
 			
 			htmlData = htmlData +'<div id="divdesc'+row.ID_REMITO_DETALLE+'" data-role="fieldcontain">';
 			htmlData = htmlData +'<label for="tnDESCUENTO">Descuento Gs.</label>';
-			htmlData = htmlData +'<input id="tnDESCUENTO'+row.ID_REMITO_DETALLE+'"   name="DESCUENTO" type="number" value="0" disabled />';
+			htmlData = htmlData +'<input id="tnDESCUENTO'+row.ID_REMITO_DETALLE+'"   name="DESCUENTO" type="text" value="0" disabled />';
 			htmlData = htmlData +'</div>';
 
 			$("#fVta",'#pVenta').append(htmlData);
@@ -1530,51 +1590,51 @@ var app = {
 		    //totalse descuentos excentas,grav5,grav10
 		    htmlData = '<div id="divTD0" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTDESC0">TOTAL DESCUENTO Gs.</label>';
-		    htmlData = htmlData +'<input id="tnTDESC0"   name="TDESC0" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTDESC0"   name="TDESC0" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    htmlData = '<div id="divTD5" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTDESC5">TOTAL DESCUENTO Gs.</label>';
-		    htmlData = htmlData +'<input id="tnTDESC5"   name="TDESC5" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTDESC5"   name="TDESC5" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    htmlData = '<div id="divTD10" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTDESC10">TOTAL DESCUENTO Gs.</label>';
-		    htmlData = htmlData +'<input id="tnTDESC10"   name="TDESC10" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTDESC10"   name="TDESC10" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 		    
 		    //totales venta exc,gra5,gra10
 		    htmlData = htmlData +'<div id="divT0" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTOTAL0">TOTAL EXCENTAS</label>';
-		    htmlData = htmlData +'<input id="tnTOTAL0"   name="TOTAL0" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTOTAL0"   name="TOTAL0" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    htmlData = htmlData +'<div id="divT5" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTOTAL5">TOTAL GRAV. 5%</label>';
-		    htmlData = htmlData +'<input id="tnTOTAL5"   name="TOTAL5" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTOTAL5"   name="TOTAL5" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    htmlData = htmlData +'<div id="divT10" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTOTAL10">TOTAL GRAV. 10%</label>';
-		    htmlData = htmlData +'<input id="tnTOTAL10"   name="TOTAL10" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTOTAL10"   name="TOTAL10" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    //total iva5,iva10
 		    htmlData = htmlData +'<div id="divI5" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnIVA5">I.V.A. 5%</label>';
-		    htmlData = htmlData +'<input id="tnIVA5"   name="IVA5" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnIVA5"   name="IVA5" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    htmlData = htmlData +'<div id="divI10" data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnIVA10">I.V.A. 10%</label>';
-		    htmlData = htmlData +'<input id="tnIVA10"   name="IVA10" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnIVA10"   name="IVA10" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 		    
 		    
 		    //total general
 		    htmlData = htmlData +'<div data-role="fieldcontain">';
 		    htmlData = htmlData +'<label for="tnTOTAL">TOTAL Gs.</label>';
-		    htmlData = htmlData +'<input id="tnTOTAL"   name="TOTAL" type="number" value="0" disabled />';
+		    htmlData = htmlData +'<input id="tnTOTAL"   name="TOTAL" type="text" value="0" disabled />';
 		    htmlData = htmlData +'</div>';
 
 		    $("#fVta",'#pVenta').append(htmlData);
@@ -1592,7 +1652,9 @@ var app = {
 		    $('#divI10','#pVenta').hide();
 
 		    $("#fVta",'#pVenta').trigger("create");
-		    //
+		    //format
+		    //$(':input[type=number]','#fVta').number(true);//,0,'.',',');
+		    
 		    for (var i=0; i<len; i++){
 		      var row= results.rows.item(i);
 		      app.vtaChange(row.ID_REMITO_DETALLE);
@@ -1613,7 +1675,7 @@ var app = {
 	if(!app.vtaValidate(inum))
 	   return 0;
 	var cant=parseFloat($("#tnCANT"+inum,"#pVenta").val());
-	var precio=parseFloat($("#tnPRECIO"+inum,"#pVenta").val());
+	var precio=app.unFmtNum($("#tnPRECIO"+inum,"#pVenta").val());
 	//var acum=0.0;
 	var acumde=0.0;
 	var acumd5=0.0;
@@ -1627,9 +1689,9 @@ var app = {
 	//console.log('  precio '+precio);
 	//console.log('  subtot '+(cant*precio));
 	app.vitems[inum]=cant*precio;
-	$("#tnSUBTOTAL"+inum,"#pVenta").val(app.vitems[inum]);
-	$("#tnDESCUENTO"+inum,"#pVenta").val(app.vitems[inum]*app.vdescuento[inum]/100.0);
-	$("#tnIVA"+inum,"#pVenta").val(app.viva[inum]);
+	$("#tnSUBTOTAL"+inum,"#pVenta").val(app.fmtNum(app.vitems[inum]));
+	$("#tnDESCUENTO"+inum,"#pVenta").val(app.fmtNum(app.vitems[inum]*app.vdescuento[inum]/100.0));
+	$("#tnIVA"+inum,"#pVenta").val(app.fmtNum(app.viva[inum]));
 	for (var i in app.vitems) {
 	  //acum += app.vitems[i];
 	  console.log('iva '+i+' ['+app.viva[i]+']');	  
@@ -1648,21 +1710,21 @@ var app = {
 	    acumde += Math.round( app.vitems[i]*app.vdescuento[inum]/100.0 );
 	  }
 	}
-	$("#tnTDESC0","#pVenta").val(acumde);	
-	$("#tnTDESC5","#pVenta").val(acumd5);	
-	$("#tnTDESC10","#pVenta").val(acumd10);	
+	$("#tnTDESC0","#pVenta").val(app.fmtNum(acumde));	
+	$("#tnTDESC5","#pVenta").val(app.fmtNum(acumd5));	
+	$("#tnTDESC10","#pVenta").val(app.fmtNum(acumd10));	
 
-	$("#tnTDESC","#pVenta").val(acumde+acumd5+acumd10);
+	$("#tnTDESC","#pVenta").val(app.fmtNum(acumde+acumd5+acumd10));
 
-	$("#tnIVA5","#pVenta").val(iva5);	
-	$("#tnIVA10","#pVenta").val(iva10);	
+	$("#tnIVA5","#pVenta").val(app.fmtNum(iva5));	
+	$("#tnIVA10","#pVenta").val(app.fmtNum(iva10));	
 
 	
-	$("#tnTOTAL0","#pVenta").val(acume - acumde);
-	$("#tnTOTAL5","#pVenta").val(acum5 - acumd5);
-	$("#tnTOTAL10","#pVenta").val(acum10 - acumd10);
+	$("#tnTOTAL0","#pVenta").val(app.fmtNum(acume - acumde));
+	$("#tnTOTAL5","#pVenta").val(app.fmtNum(acum5 - acumd5));
+	$("#tnTOTAL10","#pVenta").val(app.fmtNum(acum10 - acumd10));
 	
-	$("#tnTOTAL","#pVenta").val(acume+acum5+acum10 - acumde-acumd5-acumd10);
+	$("#tnTOTAL","#pVenta").val(app.fmtNum(acume+acum5+acum10 - acumde-acumd5-acumd10));
 	
 	if(acumde>0)
 	  $('#divTD0','#pVenta').show();
@@ -1704,29 +1766,40 @@ var app = {
 	if(iva10>0)
 	  $('#divI10','#pVenta').show();
 	else
-	  $('#divI10','#pVenta').hide();		    	
+	  $('#divI10','#pVenta').hide();
+	
+	
+      
+	
 	
     },
     vtaValidate: function(inum){
 	console.log('vtaValidate '+inum+ ' '+app.vdescr[inum]);
-	var cant=$("#tnCANT"+inum,"#pVenta").val();
-	var precio=$("#tnPRECIO"+inum,"#pVenta").val();
+	var cant=app.unFmtNum($("#tnCANT"+inum,"#pVenta").val());
+	var precio=app.unFmtNum($("#tnPRECIO"+inum,"#pVenta").val());
 	var acum=0;
-	//console.log('  cant '+cant);
-	//console.log('  precio '+precio);
-	//console.log('  subtot '+(cant*precio));
+	console.log('  cant '+cant);
+	console.log('  precio '+precio);
+	console.log('  subtot '+(cant*precio));
+	console.log('  vact '+app.vactual[inum]+' vdisp '+ app.vdisponible[inum]+ ' vdisptot '+(app.vdisponible[inum]+app.vactual[inum]));
 	if(isNaN(cant)){
-	  alert(app.vdescr[inum]+' Cantidad no valida. solo digitos y punto decimal');
+	  alert(app.vdescr[inum]+'\nCantidad no valida. solo se permite digitos y punto decimal');
 	  return 0;
 	}else if(isNaN(precio)){
-	  alert(app.vdescr[inum]+'Precio no valido. solo digitos y punto decimal');
+	  alert(app.vdescr[inum]+'\nPrecio no valido. solo se permite digitos y punto decimal');
 	  return 0;
 	}else{
 	  if(cant<0){
-	    alert(app.vdescr[inum]+'Cantidad no valido. mayor o igual a cero');
+	    alert(app.vdescr[inum]+'\nCantidad no valida. debe ser mayor o igual a cero');
 	    return 0;
 	  }else if(precio<0){
-	    alert(app.vdescr[inum]+'Precio no valido. mayor o igual a cero');
+	    alert(app.vdescr[inum]+'\nPrecio no valido. debe ser mayor o igual a cero');
+	    return 0;
+	  }else if(cant>app.vdisponible[inum] && app.ticket == 0){
+	    alert(app.vdescr[inum]+'\nLa cantidad vendida ['+ app.fmtNum(cant) +'] supera la cantidad disponible ['+app.fmtNum(app.vdisponible[inum])+'] para la venta');
+	    return 0;
+	  }else if(cant>(app.vdisponible[inum] + app.vactual[inum]) && app.ticket >0){
+	    alert(app.vdescr[inum]+'\nLa cantidad vendida ['+ app.fmtNum(cant) +'] supera la cantidad disponible ['+app.fmtNum(app.vdisponible[inum])+'] ');
 	    return 0;
 	  }
 	}	
@@ -1741,13 +1814,13 @@ var app = {
 
 	app.db.transaction(
 	  function(tx){
-	    console.log('dbVenta');
+	    console.log('dbVenta Tkt '+app.ticket);
 	    if(app.ticket==0){
 	    var params=[
-	      $("#tnFACT","#pVenta").val()  
+	      $("#tsFACT","#pVenta").val()  
 	      ,app.cfg['ID']
 	      ,app.cliData['ID_CLIENTE']
-	      ,$("#tnTOTAL","#pVenta").val()
+	      ,app.unFmtNum($("#tnTOTAL","#pVenta").val())
 	      ,app.geoPos.coords.latitude
 	      ,app.geoPos.coords.longitude
 	      ,app.geoPos.coords.accuracy
@@ -1771,12 +1844,12 @@ var app = {
 				//console.log('    descuento ['+$("#tnDESCUENTO"+inum,"#pVenta").val() + ']');
 				//console.log('    descuento int [' + parseInt($("#tnDESCUENTO"+inum,"#pVenta").val()) + ']');
 				var params=[
-				  $("#tnCANT"+inum,"#pVenta").val()
-				  ,$("#tnPRECIO"+inum,"#pVenta").val()
-				  ,$("#tnSUBTOTAL"+inum,"#pVenta").val()
+				  app.unFmtNum($("#tnCANT"+inum,"#pVenta").val())
+				  ,app.unFmtNum($("#tnPRECIO"+inum,"#pVenta").val())
+				  ,app.unFmtNum($("#tnSUBTOTAL"+inum,"#pVenta").val())
 				  //,$("#tnIVA"+inum,"#pVenta").val()
 				  ,app.viva[inum]
-				  ,$("#tnDESCUENTO"+inum,"#pVenta").val()
+				  ,app.unFmtNum($("#tnDESCUENTO"+inum,"#pVenta").val())
 				  ,app.geoPos.coords.latitude
 				  ,app.geoPos.coords.longitude
 				  ,app.geoPos.coords.accuracy
@@ -1811,8 +1884,8 @@ var app = {
 	    }else{
 	      //venta ya guardada usar update app.ticket
 	    var params=[
-	      $("#tnFACT","#pVenta").val()  
-	      ,$("#tnTOTAL","#pVenta").val()
+	      $("#tsFACT","#pVenta").val()  
+	      ,app.unFmtNum($("#tnTOTAL","#pVenta").val())
 	      ,app.geoPos.coords.latitude
 	      ,app.geoPos.coords.longitude
 	      ,app.geoPos.coords.accuracy
@@ -1836,9 +1909,9 @@ var app = {
 				console.log('  inum '+inum + ' ' + app.vdescr[inum]);
 				var params=[
 				  $("#tnCANT"+inum,"#pVenta").val()
-				  ,$("#tnSUBTOTAL"+inum,"#pVenta").val()
-				  ,$("#tnIVA"+inum,"#pVenta").val()
-				  ,$("#tnDESCUENTO"+inum,"#pVenta").val()
+				  ,app.unFmtNum($("#tnSUBTOTAL"+inum,"#pVenta").val())
+				  ,app.unFmtNum($("#tnIVA"+inum,"#pVenta").val())
+				  ,app.unFmtNum($("#tnDESCUENTO"+inum,"#pVenta").val())
 				  ,app.geoPos.coords.latitude
 				  ,app.geoPos.coords.longitude
 				  ,app.geoPos.coords.accuracy
@@ -1869,7 +1942,8 @@ var app = {
 			    //regEv(descr,id_cliente,id_cli_device,img,imgUri,idVenta)  
 			    app.regEv('VTA.UPD',app.cliData.ID_CLIENTE,app.cliData.ID_CLI_DEVICE);
 			    console.log('vta cab saved!'); 
-			  });		    
+			  });
+			  setTimeout(function(){app.ticket=0;app.closeRem();}, 300);    
 		  }
 		  ,app.onError
 	      );
@@ -1879,11 +1953,8 @@ var app = {
 	,app.onError
 	,function(){ 
 	  console.log('vta saved!');
-	   if(app.ticket==0) 
-	     $.mobile.changePage($("#pCli"), { });
-	   else{
-	     app.ticket=0;
-	     app.closeRem();
+	   if(app.ticket==0){ 
+	      setTimeout(function(){$.mobile.changePage($("#pCli"), { });}, 300);   
 	   }
       });
 	//$("#tnSUBTOTAL"+inum,"#fVta").val(cant*precio);
@@ -1941,12 +2012,16 @@ var app = {
 			      $("#pCieTitle","#pCierre").empty().html('Remisión Nº '+row.REMISION_NRO+' ('+row.ID_REMITO+')');
 			      app.nrem=row.ID_REMITO;
 			    }
-			    htmlData = '<li ><a href="#"><h2>'+row.PDESCR+'</h2><p  class="ui-li-aside">'+(row.CANTIDAD_NETA - row.VENDIDO)+' <br> Gs '+row.PRECIO+' * '+(row.CANTIDAD_NETA - row.VENDIDO)+' = '+(row.CANTIDAD_NETA - row.VENDIDO)*row.PRECIO+'</p></a></li>';
+			    var queda=(row.CANTIDAD_NETA - row.VENDIDO);
+			    if(queda<0){
+			      queda=0;
+			    }
+			    htmlData = '<li ><a href="#"><h2>'+row.PDESCR+'</h2><p  class="ui-li-aside"><br>'+app.fmtNum(queda)+' <br> Gs '+app.fmtNum(row.PRECIO)+' * '+app.fmtNum(queda)+' = '+app.fmtNum(queda*row.PRECIO)+'</p></a></li>';
 			    //console.log(htmlData);
-			    acum=acum+parseInt(((row.CANTIDAD_NETA - row.VENDIDO)*row.PRECIO));
+			    acum=acum+parseInt((queda*row.PRECIO));
 			    $("#lstCie","#pCierre").append(htmlData);
 			}
-			htmlData = 'Devolucion Mercaderias<br>Gs '+acum.toLocaleString()+'';
+			htmlData = 'Devolucion Mercaderias<br>Gs '+app.fmtNum(acum);
 			$("#tProd","#pCierre").html(htmlData);
 			//
 		    }
@@ -1970,12 +2045,12 @@ var app = {
 			    app.cieCnt=row.ICANT;
 			    //$("#pCieTitle","#pCierre").empty().html('Remisión Nº '+row.REMISION_NRO+' ('+row.ID_REMITO+')');
 			  }
-			  htmlData = '<li ><a href="#" onClick="app.onEditVenta('+row.TICKET+',\''+row.FACTURA+'\','+row.ID_CLIENTE+')" ><h2>'+row.NOMBRE+'</h2><p  class="ui-li-aside"> '+row.FACTURA+'<br> Gs '+row.TOTAL+'</p></a></li>';
+			  htmlData = '<li ><a href="#" onClick="app.onEditVenta('+row.TICKET+',\''+row.FACTURA+'\','+row.ID_CLIENTE+')" ><h2>'+row.NOMBRE+'</h2><p  class="ui-li-aside"><br> '+row.FACTURA+'<br> Gs '+app.fmtNum(row.TOTAL)+'</p></a></li>';
 			  //console.log(htmlData);
 			  acum=acum+parseInt(row.TOTAL);
 			  $("#lstVent","#pCierre").append(htmlData);
 		      }
-		      htmlData = 'Ventas Gs '+acum.toLocaleString()+'';
+		      htmlData = 'Ventas Gs '+app.fmtNum(acum);
 		      $("#tVent","#pCierre").html(htmlData);
 		      //
 		  }
