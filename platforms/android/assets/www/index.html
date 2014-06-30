@@ -161,7 +161,7 @@
 	    <h1>Cliente</h1>
 	</div>
 	<div data-role="content">
-	  <form id="fNewCli">
+	  <form id="fNewCli" onsubmit="app.saveCli()">
 	  <div data-role="fieldcontain">
 	    <label for="tnID_CLIENTE">Código:</label>
 	    <input id="tnID_CLIENTE" name="ID_CLIENTE" type="text" disabled />
@@ -269,7 +269,7 @@
 	  <h3 id="pVentaTitle">Venta</h3>
 	</div>
 	<div data-role="content">
-	  <form id="fVta" data-enhance="true">
+	  <form id="fVta" data-enhance="true" onsubmit="app.vtaGuardar()">
           </form>
 	</div>
 	<div data-role="footer" data-position="fixed">

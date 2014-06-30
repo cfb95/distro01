@@ -201,6 +201,18 @@ var app = {
 	  app.tmrStep='5';
 	  //app.onDeviceId();
 	  clearInterval(app.tmrSetup);
+	  $( "#lstCli" ).on( "taphold",   
+	  function ( event ){
+	    //$( event.target ).addClass( "taphold" );
+		  console.log('tapholdHandler '+event.target);
+		  var myItem = $(event.target).closest('li');
+		  if( !myItem.hasClass('ui-li-divider') ){
+		    console.log('tapholdHandlerId '+myItem.attr('id'));
+		    if(myItem.attr('id').search("cli.")>=0)
+		      app.onCliSelect(myItem.attr('id').substr(4));
+		  }
+	  });
+	  
 	  app.Run();
 	}
 	if(app.tmrStep=='3'){
@@ -343,9 +355,12 @@ var app = {
 	}
 	app.geoPos=JSON.parse(JSON.stringify(position));
         app.geoPos.timestamp=ts;
-	if((app.tick%30) == 0 && app.tmrStep>='4'){
-	   //app.regEv('TRK');
-	}
+	//if((app.tick%30) == 0 && app.tmrStep>='4'){
+	//   app.regEv('TRK');
+	//}
+	//if((app.tick%1) == 0 && app.tmrStep>='4'){
+	//   app.regEv('TRK');
+	//}
     },
     onDeviceId: function(){
         $.mobile.changePage($("#pDevId"), {});     
@@ -870,6 +885,19 @@ var app = {
       console.log('  SQL '+sql);
       tx.executeSql(sql,params,app.dbOnLoadCliLst,app.onError);    
     },
+    compressModif: function(modificado){
+      var ret='';
+      if(modificado){
+	if(modificado.indexOf("MODIFICADO") != -1){
+	  ret=ret+'M ';
+	}	
+	if(modificado.indexOf("VISITADO") != -1){
+	  ret=ret+'V ';
+	}
+	ret=' ('+ret.trim()+')';
+      }
+      return ret;
+    },
     dbOnLoadCliLst: function(tx, results){
 	//$.mobile.showPageLoadingMsg(true);
 	var len = results.rows.length;
@@ -881,7 +909,7 @@ var app = {
 	    var row= results.rows.item(i);
 	    //console.log('   ID_CLIENTE '+ row.ID_CLIENTE + ' ' +row.NOMBRE);
 	    //var htmlData = '<li onClick="app.onCliSelect('+row.ID_CLIENTE+')" ><a href="#"><h2>'+row.NOMBRE+'</h2><p id="'+row.ID_CLIENTE+'" class="ui-li-aside">'+row.DIRECCION+'<br>'+row.ZZ_MODIFIED+'</p></a></li>';
-	    var htmlData = '<li onClick="app.onCliVenta('+row.ID_CLIENTE+')" id="cli.'+row.ID_CLIENTE+'"><a href="#"><h2>'+row.NOMBRE+'</h2><p id="'+row.ID_CLIENTE+'" class="ui-li-aside">'+row.DIRECCION+'<br>'+row.ZZ_MODIFIED+'</p></a></li>';
+	    var htmlData = '<li onClick="app.onCliVenta('+row.ID_CLIENTE+')" id="cli.'+row.ID_CLIENTE+'"><a href="#"><h3 id="H'+row.ID_CLIENTE+'">'+row.NOMBRE+'</h3><p id="'+row.ID_CLIENTE+'" class="ui-li-aside"><br><br>'+row.DIRECCION+app.compressModif(row.ZZ_MODIFIED)+'</p></a></li>';
 	    //var htmlData = '<li id="'+row.ID_CLIENTE+'"><a href="#"><h2>'+row.ID_CLIENTE+'</h2><p class="ui-li-aside">'+row.ID_CLIENTE+'</p></a></li>';
 	    console.log(htmlData);
 	    //var htmlData = '<li "><a href="#" data-role="button" data-inline="true">'+row.NOMBRE+'</a><a href="#" data-role="button" data-inline="true">Modif</a><a href="#"><p id="'+row.ID_CLIENTE+'" class="ui-li-aside">'+row.DIRECCION+'<br>'+row.ZZ_MODIFIED+'</p></a></li>';
@@ -911,7 +939,7 @@ var app = {
 	  console.log('.listview(refresh) '+err.message)	  
 	}
 	console.log('refreshed!');
-        
+        /*
 	$( "#lstCli" ).on( "taphold",   
 	function ( event ){
 	  //$( event.target ).addClass( "taphold" );
@@ -923,7 +951,7 @@ var app = {
 		    app.onCliSelect(myItem.attr('id').substr(4));
 		}
 	});
-	
+	*/  
 	//$(document).on('click', '#lstCli li a', app.onCliSelect);	
 	//document.getElementById('synCli').innerHTML ="Sincronizado";      
         //$.mobile.changePage($("#pCli"), {});     
@@ -1005,7 +1033,7 @@ var app = {
       console.log('  e '+ e);
       app.cliente=e+'';
       //cargar lista de clientes
-      $.mobile.changePage($("#pCliEdit"), {});     
+      //$.mobile.changePage($("#pCliEdit"), {});     
       app.db.transaction(app.dbLoadCli, app.onError,app.onCliSelected);
     },
     onCliSelected: function(e){
@@ -1036,6 +1064,7 @@ var app = {
       $('#tnID_SUPERVISOR').selectmenu().selectmenu("refresh");
       $('#tnTIPO_VENTA').selectmenu().selectmenu("refresh");
       */
+      setTimeout($.mobile.changePage($("#pCliEdit"), {}),300);
     },
     Run: function(){
       //dispositivo habilitado 
@@ -1100,8 +1129,11 @@ var app = {
     },
     dbSyncHCli: function(tx){
       console.log('  dbSyncHCli ');
+      console.log('SQL');
+
       for( var i =0;i< app.syncData.cmds.length;i++){
 	//console.log('  cmd '+app.syncData.cmds[i].CMD);
+	console.log(app.syncData.cmds[i].CMD+';');
 	tx.executeSql(app.syncData.cmds[i].CMD);     
       }
     },
@@ -1142,27 +1174,31 @@ var app = {
 	
 	app.devEvCnt=len;
 	app.devEvOk=0;
-	for(j=0;j<len;j+=10){
-	  var rows=[];
-	  for (var i=0; i<Math.min(10,len - j) ; i++){
+	//for(j=0;j<len;j+=10){
+	//  var rows=[];
+	//  for (var i=0; i<Math.min(10,len - j) ; i++){
 	      //console.log("Row = " + i + " ROWID = " + results.rows.item(i).rowid + " ev =  " + results.rows.item(i).EVENTO);
-	      rows.push(results.rows.item(j+i));
-	  } 
+	//      rows.push(results.rows.item(j+i));
+	//  } 
 	  //console.log("Rows = " +JSON.stringify(rows));
 	  
-	  //for (var i=0; i<len; i++){
-	      //console.log("Row = " + i + " ROWID = " + results.rows.item(i).ROWID + " ev =  " + results.rows.item(i).EVENTO);
-	      
+	  for (var i=0; i<len; i++){
+	      var rows=[];
+	      console.log("Row = " + i + " ROWID = " + results.rows.item(i).ROWID + " ev =  " + results.rows.item(i).EVENTO);
+	      /*
 	      $.post(app.srvURL+'&e=devEv', {rows: rows}, app.onSrvData, 'json')
 		.fail(app.onSrvFail)
 		.always(app.onSrvAlways);
-	      /*	    
-	      $.getJSON(app.getSrvUrl()+'&e=devEv',{rows: rows},app.onSrvData)
+	      */	    
+	      rows.push(results.rows.item(i));
+	      console.log("Rows = " +JSON.stringify(rows));
+	      setTimeout(function(){ 
+		$.getJSON(app.getSrvUrl()+'&e=devEv',{rows: rows},app.onSrvData)
 		.fail(app.onSrvFail)
 		.always(app.onSrvAlways);
-	    */   
-	  //}
-	}
+	      },300);
+	  }
+	//}
         if(len==0){
 	  app.onSrvData({e:'devEv',msg:'Sin Eventos'});
 	}
@@ -1208,6 +1244,7 @@ var app = {
 	  }else if(k!='ID_REPARTIDOR' && k.substr(0,3)!='ZZ_' && !(String(v) === 'undefined')  ){
 	    upd=upd+','+k+"='"+v+"'";
 	  }
+	  //app.cliData[k]=v;
 	}
       }
       sql="UPDATE cliente SET "+upd.substring(1)+ ",ZZ_MODIFIED=trim(?) WHERE "+whe;
@@ -1272,11 +1309,16 @@ var app = {
       app.onCliSelect(app.cfg["LID"]+'');
     },
     onSavedCli: function(){
-      console.log('onSavedCli');
-      $( '#'+app.cliData.ID_CLIENTE, '#pCli').html(app.cliData.DIRECCION+'<br>'+app.cliData.ZZ_MODIFIED);
+      console.log('onSavedCli '+app.cliData.NOMBRE);
+      //$( '#'+app.cliData.ID_CLIENTE, '#pCli').html('<br>'+app.cliData.ZZ_MODIFIED+'<br>'+app.cliData.DIRECCION);
+      //$( '#H'+app.cliData.ID_CLIENTE, '#pCli').html(app.cliData.NOMBRE);
       //$('#lstCli').listview('refresh');
+      //setTimeout( $.mobile.changePage($("#pCli"), { }),500);
+      //$.mobile.changePage($("#pCli"), { });
       app.refreshCliList();
       $.mobile.changePage($("#pCli"), { });
+      //alert('Cliente Guardado!\n'+app.cliData.NOMBRE);
+      
     },
     dbLst: function(tx){
       tx.executeSql('SELECT * FROM codigo order by tbl,descr',
@@ -1954,7 +1996,7 @@ var app = {
 	,function(){ 
 	  console.log('vta saved!');
 	   if(app.ticket==0){ 
-	      setTimeout(function(){$.mobile.changePage($("#pCli"), { });}, 300);   
+	      setTimeout(function(){$.mobile.changePage($("#pCli"), { });}, 500);   
 	   }
       });
 	//$("#tnSUBTOTAL"+inum,"#fVta").val(cant*precio);
@@ -2127,7 +2169,7 @@ var app = {
 			    .fail(app.onSrvFail)
 			    .always(app.onSrvAlways);
 		      }
-		      $.ajaxSetup({async: true});
+		      //$.ajaxSetup({async: true});
 		  }
 		  ,app.onError
 	    );
@@ -2165,7 +2207,7 @@ var app = {
 			.fail(app.onSrvFail)
 			.always(app.onSrvAlways);  
 		  }
-		  $.ajaxSetup({async: true});
+		  //$.ajaxSetup({async: true});
 		  if(len==0){
 		    app.onSrvData({e:'cierredet', success: true, msg:'Sin Ventas det'});
 		    /*
